@@ -8,7 +8,9 @@ const PORT = 3000;
 // ตั้งค่า CORS ให้เว็บ Frontend ของคุณเรียกใช้งานได้ (รองรับขนาดรูป Base64 ใหญ่ๆ ด้วย)
 app.use(cors());
 app.use(express.json({ limit: "15mb" }));
-
+app.get("/", (req, res) => {
+  res.status(200).send("Proxy Server is ready!");
+});
 // Endpoint สำหรับรับรูปภาพจาก Frontend แล้วส่งต่อไปหา Roboflow
 app.post("/api/detect", async (req, res) => {
   try {
