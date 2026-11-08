@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CookMind</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <h2>CookMind</h2>
+      <a href="#find">Find Recipes</a>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-content">
+        <p class="eyebrow">SMART RECIPE RECOMMENDER AI</p>
+        <h1>Turn Your Ingredients Into Delicious Meals.</h1>
+        <p>
+          Upload a photo of your ingredients and let AI help you discover
+          recipes you can make.
+        </p>
+        <a href="#find" class="btn">Get Started</a>
+      </div>
+      <img src="images/refrigerator.jpg" alt="refrigerator" />
+    </section>
+
+    <!-- How It Works -->
+    <section class="how">
+      <h2>How It Works</h2>
+      <p>Discover recipes in four simple steps.</p>
+
+      <div class="steps">
+        <div>
+          <span>01</span>
+          <h3>Take a Photo</h3>
+          <p>Take or upload a photo of your ingredients.</p>
+        </div>
+
+        <div>
+          <span>02</span>
+          <h3>AI Detection</h3>
+          <p>AI identifies the ingredients in your photo.</p>
+        </div>
+
+        <div>
+          <span>03</span>
+          <h3>Find Recipes</h3>
+          <p>Find recipes that match your ingredients.</p>
+        </div>
+
+        <div>
+          <span>04</span>
+          <h3>Start Cooking</h3>
+          <p>View the ingredients and cooking instructions.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload Ingredients -->
+    <section class="find" id="find">
+      <div class="find-text">
+        <p class="eyebrow">FIND YOUR NEXT MEAL</p>
+        <h2>What's in Your Kitchen?</h2>
+        <p>
+          Upload a photo of your ingredients and let AI find delicious recipes
+          you can prepare.
+        </p>
+      </div>
+
+      <div class="upload">
+        <h3>Upload Ingredients</h3>
+
+        <label for="photo">Ingredient Photo</label>
+        <input type="file" id="photo" accept="image/*" />
+
+        <label for="cuisine">Select Food Style</label>
+        <select id="cuisine"></select>
+
+        <button type="button" id="submit-btn">Find My Recipes</button>
+      </div>
+    </section>
+
+    <!-- Recipe Recommendations -->
+    <section class="recipes">
+      <p class="eyebrow">RECIPE RECOMMENDATIONS</p>
+      <h2>Recipes You Can Make</h2>
+      <p>Explore recipes based on your available ingredients.</p>
+
+      <div class="recipe-list">
+        <!-- <div class="recipe">
+          <div class="recipe-content">
+            <p class="category">BREAKFAST</p>
+            <h3>Avocado Egg Toast</h3>
+            <p>15 min · Easy</p>
+
+            <div class="recipe-detail">
+              <h4>Ingredients</h4>
+              <p>Bread, Egg, Avocado</p>
+
+              <h4>Instructions</h4>
+              <p>Toast the bread, cook the egg, and add sliced avocado.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="recipe">
+          <div class="recipe-content">
+            <p class="category">HEALTHY</p>
+            <h3>Fresh Garden Salad</h3>
+            <p>10 min · Easy</p>
+
+            <div class="recipe-detail">
+              <h4>Ingredients</h4>
+              <p>Lettuce, Tomato, Cucumber</p>
+
+              <h4>Instructions</h4>
+              <p>Wash and cut the vegetables, then mix with dressing.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="recipe">
+          <div class="recipe-content">
+            <p class="category">LUNCH</p>
+            <h3>Colorful Veggie Bowl</h3>
+            <p>20 min · Easy</p>
+
+            <div class="recipe-detail">
+              <h4>Ingredients</h4>
+              <p>Rice, Carrot, Broccoli, Egg</p>
+
+              <h4>Instructions</h4>
+              <p>Cook the vegetables and egg, then serve with rice.</p>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <h2>CookMind</h2>
+      <p>Make delicious meals with what you have.</p>
+    </footer>
+    <script src="javascripts/main.js" type="module"></script>
+  </body>
+</html>
