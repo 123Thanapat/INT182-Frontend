@@ -1,12 +1,15 @@
 export async function getIngredients(imageUrl) {
   // API key goes in the Authorization header (inference v1.5.0+)
-  const response = await fetch("http://localhost:3000/api/detect", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    "https://int182-frontend-and-backend-proxy.onrender.com/api/detect",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl }), // ส่ง Base64 ไป
     },
-    body: JSON.stringify({ imageUrl }), // ส่ง Base64 ไป
-  });
+  );
   const data = await response.json();
   console.log(data);
   const predictions = data.outputs?.[0]?.predictions?.predictions || [];
