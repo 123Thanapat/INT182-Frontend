@@ -99,7 +99,6 @@ function createRecipeCard(recipe) {
   return recipeElement;
 }
 window.addEventListener("DOMContentLoaded", async () => {
-  await fetch("https://int182-recommend-model.onrender.com/");
   const cuisineSelectElement = document.getElementById("cuisine");
   const fragment = document.createDocumentFragment();
   cuisines.forEach((cuisine) => {
