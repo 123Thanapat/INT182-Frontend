@@ -2,7 +2,7 @@
 import * as fetchService from "./fetchService.js";
 // const { recipes } = recipeData;
 const cuisines = [
-  "general",
+  "north-american",
   "mexican",
   "italian",
   "chinese",
@@ -34,7 +34,6 @@ const cuisines = [
   "russian",
   "polish",
   "filipino",
-  "north-american",
   "south-west-pacific",
   "vegetarian",
 ];
@@ -105,6 +104,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     fragment.appendChild(createCuisineOptions(cuisine));
   });
   cuisineSelectElement.appendChild(fragment);
+  fetchService.awakenApi();
 });
 
 const recipeList = document.querySelector(".recipe-list");
@@ -120,32 +120,40 @@ submitBtn.addEventListener("click", async () => {
     document.querySelector(".upload").appendChild(pElement);
     return;
   }
+  const errorElement = document.querySelector(".error");
+  const progressElement = document.querySelector(".progress");
   try {
+    errorElement.classList.add("hidden");
+    progressElement.classList.remove("hidden");
     recipeList.innerHTML = "";
     // 1. นำไฟล์รูปจากเครื่องอัปโหลดขึ้น Public Image Hosting ก่อน เพื่อเอา Public URL
     console.log("Uploading image to public hosting...");
+    progressElement.textContent = "Upload Image...";
     const publicImageUrl = await fetchService.uploadToPublicHosting(file);
     console.log("Image URL received:", publicImageUrl);
 
     // 2. ส่ง Public URL ไปที่ Backend Proxy เพื่อให้ Roboflow ตรวจจับวัตถุดิบ
     console.log("Sending to Roboflow...");
+    progressElement.textContent = "Scaning Ingredients...";
     const ingredients = await fetchService.getIngredients(publicImageUrl);
     console.log(ingredients);
+    progressElement.textContent = `Found Ingredients ${ingredients}`;
     console.log("Sending to Render...");
+    progressElement.textContent = "Finding Recipes(Can Up to 2 minutes)...";
     const { recipes } = await fetchService.getRecipes(
       [...ingredients, ...assumeAlwaysTrue],
       cuisine,
     );
     console.log(recipes);
+    progressElement.textContent = "Scaning Success";
     const fragment2 = document.createDocumentFragment();
     recipes.forEach((recipe) => {
       fragment2.appendChild(createRecipeCard(recipe));
     });
     recipeList.appendChild(fragment2);
   } catch (error) {
-    const pElement = document.createElement("p");
-    pElement.textContent = error.message;
-    pElement.style.color = "red";
-    document.querySelector(".upload").appendChild(pElement);
+    errorElement.textContent = error.message;
+    errorElement.classList.remove("hidden");
+    progressElement.classList.add("hidden");
   }
 });

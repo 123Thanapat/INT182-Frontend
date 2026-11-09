@@ -296,3 +296,17 @@ footer h2 {
     grid-template-columns: 1fr;
   }
 }
+
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 5px;
+}
+.progress {
+  color: green;
+  text-align: center;
+  margin-top: 5px;
+}
+.hidden {
+  display: none;
+}

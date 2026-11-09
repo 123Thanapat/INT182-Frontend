@@ -55,3 +55,8 @@ export async function uploadToPublicHosting(file) {
 
   return data.data.url; // คืนค่ากลับมาเป็น Public URL เช่น "https://i.ibb.co/xxxx/image.jpg"
 }
+
+export function awakenApi() {
+  fetch("https://int182-frontend-and-backend-proxy.onrender.com/");
+  fetch("https://int182-recommend-model.onrender.com/");
+}
