@@ -45,6 +45,41 @@ const assumeAlwaysTrue = [
   "soy sauce",
   "water",
 ];
+function safeParseArray(data) {
+  if (Array.isArray(data)) return data;
+
+  if (typeof data === "string") {
+    let cleanedData = data.trim();
+
+    try {
+      return JSON.parse(cleanedData);
+    } catch (e) {
+      // 👉 ถ้า JSON.parse พังเพราะเครื่องหมายคำพูดด้านใน (เช่น don"t)
+      // ให้ลองแปลงเครื่องหมาย " ที่อยู่ข้างในคำศัพท์ให้เป็น escaped quote หรือแทนที่ชั่วคราว
+      try {
+        // แก้ไขเคสที่ Double Quote อยู่ระหว่างตัวอักษร (เช่น don"t -> don\'t)
+        const fixedJson = cleanedData.replace(
+          /([a-zA-Z])"([a-zA-Z])/g,
+          "$1'$2",
+        );
+        return JSON.parse(fixedJson);
+      } catch (err2) {
+        // ถ้ายังพังอีก ให้ใช้วิธีตัดแบ่งสตริงแบบปลอดภัยขั้นเด็ดขาด
+        const rawCleaned = cleanedData.replace(/^\[|\]$/g, "");
+        // แยกตามแพทเทิร์นเครื่องหมายคำพูดปิด-เปิด
+        const matches = rawCleaned.match(
+          /"([^"\\]*(?:\\.[^"\\]*)*)"|'([^'\\]*(?:\\.[^'\\]*)*)'/g,
+        );
+        if (matches) {
+          return matches.map((item) => item.slice(1, -1).replace(/\\"/g, '"'));
+        }
+        return [data];
+      }
+    }
+  }
+
+  return [];
+}
 function createCuisineOptions(cuisine) {
   const optionElement = document.createElement("option");
   optionElement.value = cuisine;
@@ -88,9 +123,10 @@ function createRecipeCard(recipe) {
   instructionHeader.textContent = "Instructions";
   detailDivElement.appendChild(instructionHeader);
 
-  for (let i = 0; i < recipe.steps.length; i++) {
+  const stepsArray = safeParseArray(recipe.steps);
+  for (let i = 0; i < stepsArray.length; i++) {
     const pElement = document.createElement("p");
-    pElement.textContent = `\u00A0\u00A0\u00A0\u00A0${i + 1}. ${recipe.steps[i]}`;
+    pElement.textContent = `\u00A0\u00A0\u00A0\u00A0${i + 1}. ${stepsArray[i]}`;
     detailDivElement.appendChild(pElement);
   }
   contentDivElement.appendChild(detailDivElement);
