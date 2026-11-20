@@ -1,5 +1,4 @@
 export async function getIngredients(imageUrl) {
-  // API key goes in the Authorization header (inference v1.5.0+)
   const response = await fetch(
     "https://int182-frontend-and-backend-proxy.onrender.com/api/detect",
     {
@@ -7,15 +6,24 @@ export async function getIngredients(imageUrl) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ imageUrl }), // ส่ง Base64 ไป
+      body: JSON.stringify({ imageUrl }),
     },
   );
   const data = await response.json();
   console.log(data);
-  const predictions = data.outputs?.[0]?.predictions?.predictions || [];
-  const raw_ingredients = [];
-  predictions.forEach((prediction) => raw_ingredients.push(prediction.class));
-  return [...new Set(raw_ingredients)];
+
+  const output = data.outputs?.[0] || {};
+  const predictions = output.predictions?.predictions || [];
+
+  // เก็บขนาดภาพต้นฉบับจาก Roboflow หากมี (บาง workflow คืน image: { width, height })
+  const imageSize = output.predictions?.image || output.image || null;
+
+  const raw_ingredients = predictions.map((prediction) => prediction.class);
+  return {
+    ingredients: [...new Set(raw_ingredients)],
+    predictions,
+    imageSize,
+  };
 }
 
 export async function getRecipes(ingredients, cuisine) {

@@ -45,6 +45,81 @@ const assumeAlwaysTrue = [
   "soy sauce",
   "water",
 ];
+function renderAnnotatedImage(
+  file,
+  predictions,
+  ingredients,
+  imageSize = null,
+) {
+  const resultSection = document.getElementById("detection-result");
+  const previewContainer = document.getElementById("detection-preview");
+  const tagsElement = document.getElementById("detected-tags");
+
+  previewContainer.innerHTML = "";
+  resultSection.classList.remove("hidden");
+
+  tagsElement.textContent =
+    ingredients.length > 0
+      ? `Detected: ${ingredients.join(", ")}`
+      : "No ingredients detected.";
+
+  const objectUrl = URL.createObjectURL(file);
+  const img = new Image();
+
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    canvas.classList.add("annotated-canvas");
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+
+    const scaleX = imageSize?.width ? img.naturalWidth / imageSize.width : 1;
+    const scaleY = imageSize?.height ? img.naturalHeight / imageSize.height : 1;
+
+    const lineWidth = Math.max(3, Math.round(canvas.width / 220));
+    const fontSize = Math.max(16, Math.round(canvas.width / 45));
+
+    predictions.forEach((pred, index) => {
+      const boxWidth = pred.width * scaleX;
+      const boxHeight = pred.height * scaleY;
+      const x = pred.x * scaleX - boxWidth / 2;
+      const y = pred.y * scaleY - boxHeight / 2;
+
+      const hue = (index * 67) % 360;
+      const color = `hsl(${hue}, 85%, 45%)`;
+
+      // วาดกรอบ Bounding Box
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lineWidth;
+      ctx.strokeRect(x, y, boxWidth, boxHeight);
+
+      // ป้ายชื่อวัตถุดิบ + % ความมั่นใจ
+      const confText =
+        typeof pred.confidence === "number"
+          ? ` ${(pred.confidence * 100).toFixed(0)}%`
+          : "";
+      const label = `${pred.class}${confText}`;
+
+      ctx.font = `600 ${fontSize}px "DM Sans", sans-serif`;
+      const textWidth = ctx.measureText(label).width;
+      const badgeHeight = fontSize + 10;
+      const badgeY = y >= badgeHeight ? y - badgeHeight : y;
+
+      ctx.fillStyle = color;
+      ctx.fillRect(x, badgeY, textWidth + 14, badgeHeight);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(label, x + 7, badgeY + fontSize + 2);
+    });
+
+    previewContainer.appendChild(canvas);
+    URL.revokeObjectURL(objectUrl);
+  };
+
+  img.src = objectUrl;
+}
 function safeParseArray(data) {
   if (Array.isArray(data)) return data;
 
@@ -149,39 +224,43 @@ submitBtn.addEventListener("click", async () => {
   const photoInput = document.getElementById("photo");
   const file = photoInput.files[0];
   const cuisine = document.getElementById("cuisine").value;
-  if (!file) {
-    const pElement = document.createElement("p");
-    pElement.textContent = "Please upload the photo";
-    pElement.style.color = "red";
-    document.querySelector(".upload").appendChild(pElement);
-    return;
-  }
   const errorElement = document.querySelector(".error");
   const progressElement = document.querySelector(".progress");
+  const resultSection = document.getElementById("detection-result");
+
+  if (!file) {
+    errorElement.textContent = "Please upload the photo";
+    errorElement.classList.remove("hidden");
+    return;
+  }
+
   try {
     errorElement.classList.add("hidden");
+    resultSection.classList.add("hidden");
     progressElement.classList.remove("hidden");
     recipeList.innerHTML = "";
-    // 1. นำไฟล์รูปจากเครื่องอัปโหลดขึ้น Public Image Hosting ก่อน เพื่อเอา Public URL
-    console.log("Uploading image to public hosting...");
-    progressElement.textContent = "Upload Image...";
-    const publicImageUrl = await fetchService.uploadToPublicHosting(file);
-    console.log("Image URL received:", publicImageUrl);
 
-    // 2. ส่ง Public URL ไปที่ Backend Proxy เพื่อให้ Roboflow ตรวจจับวัตถุดิบ
-    console.log("Sending to Roboflow...");
-    progressElement.textContent = "Scaning Ingredients...";
-    const ingredients = await fetchService.getIngredients(publicImageUrl);
-    console.log(ingredients);
-    progressElement.textContent = `Found Ingredients ${ingredients}`;
-    console.log("Sending to Render...");
-    progressElement.textContent = "Finding Recipes(Can Up to 2 minutes)...";
+    // 1. อัปโหลดรูปขึ้น Public Image Hosting
+    progressElement.textContent = "Uploading Image...";
+    const publicImageUrl = await fetchService.uploadToPublicHosting(file);
+
+    // 2. ส่งให้ Roboflow ตรวจจับวัตถุดิบ
+    progressElement.textContent = "Scanning Ingredients...";
+    const { ingredients, predictions, imageSize } =
+      await fetchService.getIngredients(publicImageUrl);
+
+    // แสดงภาพที่มี annotation ทันทีเมื่อ Roboflow ตอบกลับ
+    renderAnnotatedImage(file, predictions, ingredients, imageSize);
+
+    // 3. ค้นหาสูตรอาหาร
+    progressElement.textContent =
+      "Finding Recipes (Can take up to 2 minutes)...";
     const { recipes } = await fetchService.getRecipes(
       [...ingredients, ...assumeAlwaysTrue],
       cuisine,
     );
-    console.log(recipes);
-    progressElement.textContent = "Scaning Success";
+
+    progressElement.textContent = "Scanning Success";
     const fragment2 = document.createDocumentFragment();
     recipes.forEach((recipe) => {
       fragment2.appendChild(createRecipeCard(recipe));
